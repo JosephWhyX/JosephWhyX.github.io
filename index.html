@@ -19,42 +19,41 @@ body {
 }
 
 #bg { position: fixed; inset: 0; z-index: 0; }
-
 .vignette {
-  position: fixed; inset: 0; z-index: 1;
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background:
     radial-gradient(ellipse 60% 50% at 50% 0%, rgba(8,8,16,0) 0%, rgba(8,8,16,0.55) 100%),
     radial-gradient(ellipse 80% 60% at 50% 100%, rgba(8,8,16,0.7) 0%, rgba(8,8,16,0) 100%);
-  pointer-events: none;
 }
-
-
 
 .wrap {
   position: relative; z-index: 2;
-  max-width: 440px;
-  margin: 0 auto;
+  max-width: 440px; margin: 0 auto;
   padding: 64px 28px 100px;
   display: flex; flex-direction: column;
 }
 
-/* ── Hero ── */
-.hero { text-align: center; padding-bottom: 52px; }
-
-/* Parte fija: avatar, nombre, handle, carrera */
-.hero-static { margin-bottom: 24px; }
+/* ══════════════════════
+   HERO — parte fija
+══════════════════════ */
+.hero { text-align: center; padding-bottom: 0; }
 
 .avatar-shell {
   width: 96px; height: 96px;
   margin: 0 auto 20px; position: relative;
+  cursor: pointer;
 }
+.avatar-shell:active { transform: scale(0.96); transition: transform 0.1s; }
+
 .avatar-halo {
   position: absolute; inset: -4px; border-radius: 50%;
   background: conic-gradient(#ff6ec7, #00e5ff, #b388ff, #ff9a6c, #ff6ec7);
   animation: spin 6s linear infinite;
   filter: blur(2px); opacity: .85;
+  transition: filter 0.4s ease, opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
 .avatar-inner {
   position: relative; z-index: 1;
   width: 96px; height: 96px; border-radius: 50%;
@@ -63,71 +62,18 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-family: 'Instrument Serif', serif;
   font-size: 28px; color: #eeeaf4; overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
 }
 
-/* ── Flip: solo la parte inferior ── */
-.flip-scene {
-  width: 100%;
-  perspective: 1000px;
-  cursor: pointer;
+/* Estado activo del tap */
+.avatar-shell.tapping .avatar-halo {
+  filter: blur(5px) brightness(2);
+  opacity: 1;
 }
-.flip-scene .flip-hint-bar {
-  font-size: 10px; font-weight: 400;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(238,234,244,0.18);
-  display: flex; align-items: center; justify-content: center; gap: 5px;
-  margin-bottom: 10px;
+.avatar-shell.tapping .avatar-inner {
+  transform: scale(1.07);
+  box-shadow: 0 0 40px rgba(255,110,199,0.55), 0 0 80px rgba(0,229,255,0.2);
 }
-.flip-scene .flip-hint-bar svg { animation: hintPulse 2.5s ease-in-out infinite; }
-@keyframes hintPulse { 0%,100%{opacity:.2} 50%{opacity:.55} }
-
-.flip-card {
-  width: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
-  /* height set by JS after measuring front */
-}
-.flip-scene.flipped .flip-card { transform: rotateY(180deg); }
-
-.flip-front, .flip-back {
-  width: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-front { position: relative; }
-.flip-back {
-  position: absolute; top: 0; left: 0;
-  transform: rotateY(180deg);
-  display: flex; flex-direction: column;
-  align-items: center; gap: 12px;
-  padding: 24px 0 8px;
-}
-
-/* QR blanco sobre fondo oscuro transparente */
-.qr-wrap {
-  width: 200px; height: 200px; flex-shrink: 0;
-  background: #fff;
-  border-radius: 16px;
-  padding: 10px;
-  box-shadow: 0 0 40px rgba(255,110,199,0.15), 0 0 80px rgba(0,229,255,0.08);
-}
-.qr-wrap canvas { width: 100% !important; height: 100% !important; border-radius: 8px; }
-
-.qr-url {
-  font-size: 10px; color: rgba(238,234,244,0.3);
-  letter-spacing: 0.06em;
-}
-.qr-download {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 10px; font-weight: 500;
-  color: rgba(238,234,244,0.3); cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 99px; padding: 5px 14px;
-  background: transparent; font-family: 'Geist', sans-serif;
-  transition: all 0.15s; text-decoration: none;
-}
-.qr-download:hover { background: rgba(255,255,255,0.05); color: rgba(238,234,244,0.6); }
 
 .name {
   font-family: 'Instrument Serif', serif;
@@ -142,15 +88,46 @@ body {
 }
 .student-line {
   font-size: 11px; font-weight: 400;
-  letter-spacing: 0.08em;
-  color: rgba(238,234,244,0.35);
-  margin-top: 8px;
+  letter-spacing: 0.06em; color: rgba(238,234,244,0.32); margin-top: 7px;
 }
+
+/* ══════════════════════
+   FLIP WRAPPER
+   Envuelve bio+tags+divider+socials
+══════════════════════ */
+.flip-wrapper {
+  width: 100%;
+  perspective: 1100px;
+  margin-top: 28px;
+}
+
+.flip-inner {
+  width: 100%; position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.flip-wrapper.flipped .flip-inner { transform: rotateY(180deg); }
+
+.flip-front, .flip-back {
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-front { position: relative; }
+.flip-back {
+  position: absolute; top: 0; left: 0;
+  transform: rotateY(180deg);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+  padding: 20px 0 8px;
+}
+
+/* ── Bio y tags (frente) ── */
 .bio {
   font-size: 14px; font-weight: 300;
   color: rgba(238,234,244,0.5);
-  line-height: 1.8; margin-top: 16px;
-  max-width: 310px; margin-left: auto; margin-right: auto;
+  line-height: 1.8; text-align: center;
+  max-width: 310px; margin: 0 auto;
 }
 .bio em { font-style: normal; color: rgba(238,234,244,0.9); font-weight: 400; }
 
@@ -169,57 +146,71 @@ body {
 .tag.c { border-color: rgba(0,229,255,0.2); color: rgba(0,229,255,0.7); background: rgba(0,229,255,0.05); }
 .tag.p { border-color: rgba(255,110,199,0.2); color: rgba(255,110,199,0.7); background: rgba(255,110,199,0.05); }
 
-/* ── Divider ── */
+/* Divider */
 .divider {
-  width: 100%; height: 1px; margin: 4px 0;
+  width: 100%; height: 1px; margin: 28px 0 4px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
 }
 
-/* ── Section label ── */
+/* ── Socials ── */
 .sec-head {
   font-size: 10px; font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(238,234,244,0.2); padding: 28px 0 14px;
+  color: rgba(238,234,244,0.2); padding: 14px 0;
 }
-
-/* ── Socials ── */
 .socials { display: flex; flex-direction: column; gap: 2px; }
 
 .soc-row {
   display: flex; align-items: center; gap: 14px;
   padding: 13px 10px; border-radius: 14px;
   text-decoration: none; color: inherit;
-  cursor: pointer; position: relative; overflow: hidden;
-  /* neon border base — invisible until animation */
+  cursor: pointer; position: relative;
   border: 1px solid transparent;
-  transition: border-color 0.2s;
 }
-
-/* Option A — neon border sweep on click */
-.soc-row.neon-active {
-  animation: neonSweep 0.6s ease forwards;
-}
+.soc-row.neon-active { animation: neonSweep 0.6s ease forwards; }
 @keyframes neonSweep {
   0%   { border-color: rgba(255,110,199,0); box-shadow: none; }
   30%  { border-color: rgba(255,110,199,0.8); box-shadow: 0 0 12px rgba(255,110,199,0.4), inset 0 0 8px rgba(255,110,199,0.05); }
   60%  { border-color: rgba(0,229,255,0.8); box-shadow: 0 0 12px rgba(0,229,255,0.4), inset 0 0 8px rgba(0,229,255,0.05); }
   100% { border-color: rgba(255,255,255,0); box-shadow: none; }
 }
-
 .soc-row:hover { background: rgba(255,255,255,0.03); }
 .soc-row:hover .soc-arr { opacity: 1; transform: translateX(0); }
 
-.soc-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  background: transparent;
-}
+.soc-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: transparent; }
 .soc-text { flex: 1; }
 .soc-name { font-size: 14px; font-weight: 500; color: rgba(238,234,244,0.9); }
 .soc-sub  { font-size: 12px; font-weight: 300; color: rgba(238,234,244,0.3); margin-top: 1px; }
 .soc-arr  { font-size: 14px; color: rgba(238,234,244,0.2); opacity: 0; transform: translateX(-5px); transition: all 0.18s; }
 
-/* ── KÓR card ── */
+/* ── QR back ── */
+.qr-code-wrap {
+  /* Transparente — solo el canvas del QR es blanco */
+  display: flex; align-items: center; justify-content: center;
+}
+.qr-code-wrap canvas {
+  border-radius: 10px;
+  /* forzamos fondo blanco solo en el canvas */
+  image-rendering: pixelated;
+}
+.qr-url {
+  font-size: 10.5px; color: rgba(238,234,244,0.25);
+  letter-spacing: 0.08em;
+}
+.qr-dl-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500;
+  color: rgba(238,234,244,0.3); cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 99px; padding: 6px 16px;
+  background: transparent; font-family: 'Geist', sans-serif;
+  transition: all 0.15s;
+}
+.qr-dl-btn:hover { background: rgba(255,255,255,0.05); color: rgba(238,234,244,0.7); }
+
+/* ══════════════════════
+   KÓR
+══════════════════════ */
 .kor-card {
   margin-top: 8px; padding: 26px 24px 22px;
   border-radius: 20px;
@@ -241,36 +232,23 @@ body {
   animation: pulse 4s ease-in-out infinite alternate;
 }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
-
 .kor-ghost {
   position: absolute; right: -8px; bottom: -22px;
   font-family: 'Instrument Serif', serif;
   font-size: 100px; letter-spacing: -4px;
   color: rgba(255,110,199,0.04); pointer-events: none; user-select: none;
 }
-.kor-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
-  text-transform: uppercase; margin-bottom: 10px; color: rgba(255,110,199,0.7);
-}
-.kor-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: 24px; line-height: 1.2; color: #f5f0ff; position: relative; z-index: 1;
-}
-.kor-desc {
-  font-size: 13px; font-weight: 300; line-height: 1.65;
-  color: rgba(238,234,244,0.4); margin-top: 10px; max-width: 270px; position: relative; z-index: 1;
-}
-.kor-link {
-  display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 16px; font-size: 13px; font-weight: 500;
-  color: rgba(255,110,199,0.8); position: relative; z-index: 1;
-}
+.kor-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; color: rgba(255,110,199,0.7); }
+.kor-title { font-family: 'Instrument Serif', serif; font-size: 24px; line-height: 1.2; color: #f5f0ff; position: relative; z-index: 1; }
+.kor-desc { font-size: 13px; font-weight: 300; line-height: 1.65; color: rgba(238,234,244,0.4); margin-top: 10px; max-width: 270px; position: relative; z-index: 1; }
+.kor-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 16px; font-size: 13px; font-weight: 500; color: rgba(255,110,199,0.8); position: relative; z-index: 1; }
 .kor-link .arr { transition: transform 0.18s; }
 .kor-card:hover .arr { transform: translateX(3px); }
 
-/* ── Projects ── */
+/* ══════════════════════
+   PROJECTS
+══════════════════════ */
 .projects { display: flex; flex-direction: column; gap: 2px; }
-
 .proj-row {
   display: flex; align-items: center; gap: 14px;
   padding: 12px 10px; border-radius: 14px;
@@ -279,12 +257,7 @@ body {
 }
 .proj-row:hover { background: rgba(255,255,255,0.04); }
 .proj-row:hover .proj-arr { opacity: 1; transform: translateX(0); }
-
-.proj-dot {
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; flex-shrink: 0;
-}
+.proj-dot { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; flex-shrink: 0; }
 .proj-info { flex: 1; min-width: 0; }
 .proj-name { font-size: 14px; font-weight: 500; color: rgba(238,234,244,0.9); }
 .proj-desc { font-size: 12px; font-weight: 300; color: rgba(238,234,244,0.3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -293,12 +266,13 @@ body {
 .b-dev     { background: rgba(179,136,255,0.08); color: rgba(179,136,255,0.75); border: 1px solid rgba(179,136,255,0.2); }
 .b-concept { background: rgba(255,180,60,0.08); color: rgba(255,200,80,0.75); border: 1px solid rgba(255,180,60,0.2); }
 .proj-arr  { font-size: 14px; color: rgba(238,234,244,0.2); opacity: 0; transform: translateX(-5px); transition: all 0.18s; }
-
 .d-dx { background: rgba(255,110,199,0.08); color: rgba(255,110,199,0.7); border: 1px solid rgba(255,110,199,0.15); }
 .d-cx { background: rgba(0,229,255,0.08); color: rgba(0,229,255,0.7); border: 1px solid rgba(0,229,255,0.15); }
 .d-wa { background: rgba(179,136,255,0.08); color: rgba(179,136,255,0.7); border: 1px solid rgba(179,136,255,0.15); }
 
-/* ── CTA ── */
+/* ══════════════════════
+   CTA
+══════════════════════ */
 .cta-block { margin-top: 52px; text-align: center; }
 .cta-title { font-family: 'Instrument Serif', serif; font-size: 28px; color: #f5f0ff; line-height: 1.2; }
 .cta-sub { font-size: 13px; font-weight: 300; color: rgba(238,234,244,0.35); margin-top: 8px; line-height: 1.65; }
@@ -309,40 +283,50 @@ body {
   text-decoration: none; color: #080810; border: none; cursor: pointer;
   background: linear-gradient(135deg, #ff6ec7 0%, #b388ff 50%, #00e5ff 100%);
   box-shadow: 0 0 32px rgba(255,110,199,0.25), 0 0 64px rgba(0,229,255,0.1);
-  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
-  background-size: 200% 200%;
-  animation: gradShift 4s ease infinite;
+  transition: opacity 0.2s, transform 0.2s;
+  background-size: 200% 200%; animation: gradShift 4s ease infinite;
 }
-@keyframes gradShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.cta-pill:hover { opacity: .88; transform: scale(1.03); box-shadow: 0 0 48px rgba(255,110,199,0.4), 0 0 80px rgba(0,229,255,0.15); }
+@keyframes gradShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+.cta-pill:hover { opacity: .88; transform: scale(1.03); }
 
-/* ── Footer ── */
+/* ══════════════════════
+   FOOTER
+══════════════════════ */
 .footer { margin-top: 56px; text-align: center; font-size: 11px; color: rgba(238,234,244,0.18); letter-spacing: 0.04em; line-height: 1.8; }
 .footer .brand { color: rgba(255,110,199,0.4); }
 
-/* ── Reveal ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* ══════════════════════
+   REVEAL
+══════════════════════ */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 .wrap > * { animation: fadeUp 0.65s cubic-bezier(0.22,1,0.36,1) both; }
-.wrap > *:nth-child(1)  { animation-delay: .05s; }
-.wrap > *:nth-child(2)  { animation-delay: .10s; }
-.wrap > *:nth-child(3)  { animation-delay: .15s; }
-.wrap > *:nth-child(4)  { animation-delay: .20s; }
-.wrap > *:nth-child(5)  { animation-delay: .25s; }
-.wrap > *:nth-child(6)  { animation-delay: .30s; }
-.wrap > *:nth-child(7)  { animation-delay: .34s; }
-.wrap > *:nth-child(8)  { animation-delay: .38s; }
-.wrap > *:nth-child(9)  { animation-delay: .42s; }
-.wrap > *:nth-child(10) { animation-delay: .46s; }
-.wrap > *:nth-child(11) { animation-delay: .50s; }
+.wrap > *:nth-child(1){animation-delay:.05s} .wrap > *:nth-child(2){animation-delay:.10s}
+.wrap > *:nth-child(3){animation-delay:.15s} .wrap > *:nth-child(4){animation-delay:.20s}
+.wrap > *:nth-child(5){animation-delay:.25s} .wrap > *:nth-child(6){animation-delay:.30s}
+.wrap > *:nth-child(7){animation-delay:.34s} .wrap > *:nth-child(8){animation-delay:.38s}
+.wrap > *:nth-child(9){animation-delay:.42s} .wrap > *:nth-child(10){animation-delay:.46s}
 
 svg { display: block; }
+
+/* Tarjeta descargable — oculta fuera de pantalla */
+#download-card {
+  position: fixed; left: -9999px; top: 0;
+  width: 420px;
+  background: #080810;
+  padding: 40px 32px 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  font-family: 'Geist', sans-serif;
+}
+#download-card .dc-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  overflow: hidden; border: 2px solid rgba(255,255,255,0.12);
+}
+#download-card .dc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#download-card .dc-name { font-family: 'Instrument Serif', serif; font-size: 32px; color: #f5f0ff; letter-spacing: -0.5px; }
+#download-card .dc-handle { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #ff6ec7; }
+#download-card .dc-school { font-size: 10px; color: rgba(238,234,244,0.35); letter-spacing: 0.06em; }
+#download-card .dc-qr { /* filled by JS */ }
+#download-card .dc-url { font-size: 10px; color: rgba(238,234,244,0.25); letter-spacing: 0.08em; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -350,163 +334,141 @@ svg { display: block; }
 <canvas id="bg"></canvas>
 <div class="vignette"></div>
 
+<!-- Tarjeta oculta para descarga -->
+<div id="download-card">
+  <div class="dc-avatar"><img src="foto.png" crossorigin="anonymous"></div>
+  <div class="dc-name">Joseph Yael</div>
+  <div class="dc-handle">@JosephWhyX</div>
+  <div class="dc-school">Estudiante de Ing. Mecatrónica · Tec de Monterrey</div>
+  <div class="dc-qr" id="dcQr"></div>
+  <div class="dc-url">josephwhyx.github.io</div>
+</div>
+
 <div class="wrap">
 
-  <!-- Hero -->
+  <!-- ── Hero fijo ── -->
   <div class="hero">
-
-    <!-- Parte FIJA: avatar + nombre + handle + carrera -->
-    <div class="hero-static">
-      <div class="avatar-shell">
-        <div class="avatar-halo"></div>
-        <div class="avatar-inner">
-          <img src="foto.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-        </div>
+    <div class="avatar-shell" id="avatarTap">
+      <div class="avatar-halo"></div>
+      <div class="avatar-inner">
+        <img src="foto.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" crossorigin="anonymous">
       </div>
-      <div class="name">Joseph Yael</div>
-      <div class="handle">@JosephWhyX</div>
-      <div class="student-line">Ing. Mecatrónica · Tec de Monterrey</div>
     </div>
+    <div class="name">Joseph Yael</div>
+    <div class="handle">@JosephWhyX</div>
+    <div class="student-line">Estudiante de Ing. Mecatrónica · Tec de Monterrey</div>
+  </div>
 
-    <!-- Parte que se VOLTEA: bio + tags / QR -->
-    <div class="flip-scene" id="flipScene">
-      <div class="flip-hint-bar">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-        tap para QR
-      </div>
-      <div class="flip-card" id="flipCard">
+  <!-- ── Flip: bio + tags + divider + socials ── -->
+  <div class="flip-wrapper" id="flipWrapper">
+    <div class="flip-inner" id="flipInner">
 
-        <!-- FRONT: bio + tags -->
-        <div class="flip-front" id="flipFront">
-          <p class="bio">
-            Developer &amp; founder. Construyo software desde <em>WhyXLabs</em>
-            y tecnología médica desde <em>KÓR</em>.<br>
-            Flutter · Android · IA aplicada.
-          </p>
-          <div class="tags">
-            <span class="tag p">Founder</span>
-            <span class="tag">Flutter dev</span>
-            <span class="tag c">Tec Orbit Program</span>
-            <span class="tag">FIFA 2026 Ambassador</span>
-            <span class="tag">IMEF VP Ops</span>
-          </div>
+      <!-- FRENTE -->
+      <div class="flip-front" id="flipFront">
+        <p class="bio">
+          Developer &amp; founder. Construyo software desde <em>WhyXLabs</em>
+          y tecnología médica desde <em>KÓR</em>.<br>
+          Flutter · Android · IA aplicada.
+        </p>
+        <div class="tags">
+          <span class="tag p">Founder</span>
+          <span class="tag">Flutter dev</span>
+          <span class="tag c">Tec Orbit Program</span>
         </div>
 
-        <!-- BACK: QR -->
-        <div class="flip-back">
-          <div class="qr-wrap" id="qrWrap"></div>
-          <div class="qr-url">josephwhyx.github.io</div>
-          <a class="qr-download" id="qrDownload" download="josephwhyx-qr.png">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Descargar QR
+        <div class="divider"></div>
+        <div class="sec-head">Conéctemos</div>
+        <div class="socials">
+
+          <a class="soc-row" href="https://www.instagram.com/josephwhyX/" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#e6683c"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs>
+                <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig)"/>
+                <circle cx="12" cy="12" r="4" stroke="url(#ig)"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="#bc1888" stroke="none"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">Instagram</div><div class="soc-sub">@josephwhyX</div></div>
+            <div class="soc-arr">→</div>
           </a>
-        </div>
 
-      </div>
-    </div>
+          <a class="soc-row" href="https://www.linkedin.com/in/joseph-casimiro-mart%C3%ADnez-869808315" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">LinkedIn</div><div class="soc-sub">Joseph Yael Casimiro</div></div>
+            <div class="soc-arr">→</div>
+          </a>
 
-  </div>
+          <a class="soc-row" href="https://wa.me/5563343915" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">WhatsApp</div><div class="soc-sub">Escríbeme directo</div></div>
+            <div class="soc-arr">→</div>
+          </a>
 
-  <div class="divider"></div>
+          <a class="soc-row" href="https://www.facebook.com/profile.php?id=61577281095504" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1877F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">Facebook</div><div class="soc-sub">Joseph Yael</div></div>
+            <div class="soc-arr">→</div>
+          </a>
 
-  <!-- Socials -->
-  <div class="sec-head">Conéctemos</div>
-  <div class="socials">
+          <a class="soc-row" href="https://calendar.app.google/u1T2H84Wj7DW3o1y9" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="3"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <circle cx="12" cy="15" r="1.5" fill="#EA4335" stroke="none"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">Agenda una llamada</div><div class="soc-sub">Google Calendar</div></div>
+            <div class="soc-arr">→</div>
+          </a>
 
-    <a class="soc-row" href="https://www.instagram.com/josephwhyX/" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#e6683c"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs>
-          <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig)"/>
-          <circle cx="12" cy="12" r="4" stroke="url(#ig)"/>
-          <circle cx="17.5" cy="6.5" r="1.2" fill="#bc1888" stroke="none"/>
-        </svg>
-      </div>
-      <div class="soc-text">
-        <div class="soc-name">Instagram</div>
-        <div class="soc-sub">@josephwhyX</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
+          <a class="soc-row" href="https://chat.whatsapp.com/EWgjNsms6LaL5L8XOEaV8T" target="_blank">
+            <div class="soc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div class="soc-text"><div class="soc-name">Grupo WhatsApp</div><div class="soc-sub">Únete a la comunidad</div></div>
+            <div class="soc-arr">→</div>
+          </a>
 
-    <a class="soc-row" href="https://www.linkedin.com/in/joseph-casimiro-mart%C3%ADnez-869808315" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/>
-          <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
-        </svg>
-      </div>
-      <div class="soc-text">
-        <div class="soc-name">LinkedIn</div>
-        <div class="soc-sub">Joseph Yael Casimiro</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
+        </div><!-- /socials -->
+      </div><!-- /flip-front -->
 
-    <a class="soc-row" href="https://wa.me/5563343915" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-        </svg>
+      <!-- REVERSO -->
+      <div class="flip-back" id="flipBack">
+        <div class="qr-code-wrap" id="qrWrap"></div>
+        <div class="qr-url">josephwhyx.github.io</div>
+        <button class="qr-dl-btn" id="dlBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar
+        </button>
       </div>
-      <div class="soc-text">
-        <div class="soc-name">WhatsApp</div>
-        <div class="soc-sub">Escríbeme directo</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
 
-    <a class="soc-row" href="https://www.facebook.com/profile.php?id=61577281095504" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1877F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-        </svg>
-      </div>
-      <div class="soc-text">
-        <div class="soc-name">Facebook</div>
-        <div class="soc-sub">Joseph Yael</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
+    </div><!-- /flip-inner -->
+  </div><!-- /flip-wrapper -->
 
-    <a class="soc-row" href="https://calendar.app.google/u1T2H84Wj7DW3o1y9" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="3"/>
-          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-          <circle cx="12" cy="15" r="1.5" fill="#EA4335" stroke="none"/>
-        </svg>
-      </div>
-      <div class="soc-text">
-        <div class="soc-name">Agenda una llamada</div>
-        <div class="soc-sub">Google Calendar</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
+  <!-- Resto de página -->
+  <div class="divider" style="margin-top:32px;"></div>
 
-    <!-- Cambia LINK_GRUPO_WA por tu link cuando lo tengas -->
-    <a class="soc-row" href="LINK_GRUPO_WA" target="_blank">
-      <div class="soc-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <div class="soc-text">
-        <div class="soc-name">Grupo WhatsApp</div>
-        <div class="soc-sub">Únete a la comunidad</div>
-      </div>
-      <div class="soc-arr">→</div>
-    </a>
-
-  </div>
-
-  <div class="divider" style="margin-top:8px;"></div>
-
-  <!-- KÓR — enlaza al video de YouTube -->
-  <div class="sec-head" style="padding-top:20px;">Proyecto destacado</div>
+  <div style="font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(238,234,244,0.2);padding:20px 0 14px;">Proyecto destacado</div>
   <a class="kor-card" href="https://www.youtube.com/watch?v=hKQBdCSSs_Q&t=4s" target="_blank">
     <div class="kor-ghost">KÓR</div>
     <div class="kor-label">Startup · Tec Orbit Program</div>
@@ -515,45 +477,27 @@ svg { display: block; }
     <span class="kor-link">Ver video <span class="arr">→</span></span>
   </a>
 
-  <!-- Proyectos -->
-  <div class="sec-head" style="padding-top:24px;">Más proyectos</div>
+  <div style="font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(238,234,244,0.2);padding:24px 0 14px;">Más proyectos</div>
   <div class="projects">
-
-    <!-- DropX → página de Facebook -->
     <a class="proj-row" href="https://www.facebook.com/profile.php?id=61589202691433" target="_blank">
       <div class="proj-dot d-dx">DX</div>
-      <div class="proj-info">
-        <div class="proj-name">DropX</div>
-        <div class="proj-desc">Catálogos inmobiliarios y fichas técnicas · Flutter</div>
-      </div>
+      <div class="proj-info"><div class="proj-name">DropX</div><div class="proj-desc">Catálogos inmobiliarios y fichas técnicas · Flutter</div></div>
       <span class="proj-badge b-dev">En dev</span>
       <div class="proj-arr">→</div>
     </a>
-
-    <!-- ContaX — concepto, sin link -->
     <div class="proj-row" style="cursor:default;">
       <div class="proj-dot d-cx">CX</div>
-      <div class="proj-info">
-        <div class="proj-name">ContaX</div>
-        <div class="proj-desc">Gestión fiscal para contadores · Concepto</div>
-      </div>
+      <div class="proj-info"><div class="proj-name">ContaX</div><div class="proj-desc">Gestión fiscal para contadores · Concepto</div></div>
       <span class="proj-badge b-concept">Concepto</span>
     </div>
-
-    <!-- DirectWA → WhatsApp con mensaje -->
     <a class="proj-row" href="https://wa.me/5563343915?text=Oye%2C%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20de%20DirectWA%20%F0%9F%91%80" target="_blank">
       <div class="proj-dot d-wa">WA</div>
-      <div class="proj-info">
-        <div class="proj-name">DirectWA</div>
-        <div class="proj-desc">Abre chats de WhatsApp sin guardar contacto</div>
-      </div>
+      <div class="proj-info"><div class="proj-name">DirectWA</div><div class="proj-desc">Abre chats de WhatsApp sin guardar contacto</div></div>
       <span class="proj-badge b-live">Live</span>
       <div class="proj-arr">→</div>
     </a>
-
   </div>
 
-  <!-- CTA -->
   <div class="cta-block">
     <div class="cta-title">¿Trabajamos juntos?</div>
     <p class="cta-sub">Open to collabs, consultoría<br>y proyectos interesantes.</p>
@@ -563,146 +507,165 @@ svg { display: block; }
     </a>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <div>@<span class="brand">Joseph Yael</span></div>
     <div>© 2026 · Todos los derechos reservados</div>
   </div>
 
-</div>
+</div><!-- /wrap -->
 
 <script>
-/* ══════════════════════════════════════════
-   ANIMATED CYBERPUNK BACKGROUND
-══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   BACKGROUND CANVAS
+═══════════════════════════════════════ */
 const canvas = document.getElementById('bg');
 const ctx = canvas.getContext('2d');
 let W, H, t = 0;
+const PALETTE = [[255,110,199],[0,229,255],[179,136,255],[255,180,60]];
 
-const PALETTE = [
-  [255,110,199], // pink
-  [0,229,255],   // cyan
-  [179,136,255], // violet
-  [255,180,60],  // amber
-];
-
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
 
 class Node {
   constructor() { this.reset(true); }
   reset(init) {
-    this.x = Math.random() * W;
-    this.y = init ? Math.random() * H : H + 20;
-    this.vx = (Math.random() - 0.5) * 0.25;
-    this.vy = -(Math.random() * 0.3 + 0.08);
-    this.size = Math.random() * 2.5 + 0.5;
-    this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-    this.life = 0; this.maxLife = Math.random() * 400 + 300;
-    this.phase = Math.random() * Math.PI * 2;
-    this.shape = Math.floor(Math.random() * 3);
+    this.x=Math.random()*W; this.y=init?Math.random()*H:H+20;
+    this.vx=(Math.random()-.5)*.25; this.vy=-(Math.random()*.3+.08);
+    this.size=Math.random()*2.5+.5; this.color=PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    this.life=0; this.maxLife=Math.random()*400+300; this.phase=Math.random()*Math.PI*2; this.shape=Math.floor(Math.random()*3);
   }
-  update() {
-    this.x += this.vx + Math.sin(t * 0.008 + this.phase) * 0.18;
-    this.y += this.vy; this.life++;
-    if (this.life > this.maxLife || this.y < -20) this.reset(false);
-  }
+  update() { this.x+=this.vx+Math.sin(t*.008+this.phase)*.18; this.y+=this.vy; this.life++; if(this.life>this.maxLife||this.y<-20)this.reset(false); }
   draw() {
-    const prog = this.life / this.maxLife;
-    const alpha = prog < 0.15 ? prog / 0.15 : prog > 0.85 ? (1 - prog) / 0.15 : 1;
-    const [r,g,b] = this.color;
-    ctx.globalAlpha = alpha * 0.55;
-    ctx.fillStyle = ctx.strokeStyle = `rgb(${r},${g},${b})`;
-    ctx.lineWidth = 0.8;
-    const s = this.size;
-    if (this.shape === 0) { ctx.beginPath(); ctx.arc(this.x,this.y,s,0,Math.PI*2); ctx.fill(); }
-    else if (this.shape === 1) { ctx.beginPath(); ctx.moveTo(this.x,this.y-s*2); ctx.lineTo(this.x+s*2,this.y); ctx.lineTo(this.x,this.y+s*2); ctx.lineTo(this.x-s*2,this.y); ctx.closePath(); ctx.stroke(); }
-    else { ctx.beginPath(); ctx.moveTo(this.x-s*2,this.y); ctx.lineTo(this.x+s*2,this.y); ctx.moveTo(this.x,this.y-s*2); ctx.lineTo(this.x,this.y+s*2); ctx.stroke(); }
+    const prog=this.life/this.maxLife;
+    const alpha=prog<.15?prog/.15:prog>.85?(1-prog)/.15:1;
+    const[r,g,b]=this.color;
+    ctx.globalAlpha=alpha*.55; ctx.fillStyle=ctx.strokeStyle=`rgb(${r},${g},${b})`; ctx.lineWidth=.8;
+    const s=this.size;
+    if(this.shape===0){ctx.beginPath();ctx.arc(this.x,this.y,s,0,Math.PI*2);ctx.fill();}
+    else if(this.shape===1){ctx.beginPath();ctx.moveTo(this.x,this.y-s*2);ctx.lineTo(this.x+s*2,this.y);ctx.lineTo(this.x,this.y+s*2);ctx.lineTo(this.x-s*2,this.y);ctx.closePath();ctx.stroke();}
+    else{ctx.beginPath();ctx.moveTo(this.x-s*2,this.y);ctx.lineTo(this.x+s*2,this.y);ctx.moveTo(this.x,this.y-s*2);ctx.lineTo(this.x,this.y+s*2);ctx.stroke();}
   }
 }
-
 class GridLine {
-  constructor(isH) {
-    this.isH = isH;
-    this.pos = Math.random() * (isH ? H : W);
-    this.speed = (Math.random() * 0.12 + 0.04) * (Math.random() < 0.5 ? 1 : -1);
-    this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-    this.alpha = Math.random() * 0.06 + 0.02;
-  }
-  update() {
-    this.pos += this.speed;
-    if (this.isH) { if (this.pos > H+2) this.pos=-2; if (this.pos<-2) this.pos=H+2; }
-    else          { if (this.pos > W+2) this.pos=-2; if (this.pos<-2) this.pos=W+2; }
-  }
-  draw() {
-    const [r,g,b] = this.color;
-    ctx.globalAlpha = this.alpha;
-    ctx.strokeStyle = `rgb(${r},${g},${b})`; ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    if (this.isH) { ctx.moveTo(0,this.pos); ctx.lineTo(W,this.pos); }
-    else          { ctx.moveTo(this.pos,0); ctx.lineTo(this.pos,H); }
-    ctx.stroke();
-  }
+  constructor(isH){this.isH=isH;this.pos=Math.random()*(isH?H:W);this.speed=(Math.random()*.12+.04)*(Math.random()<.5?1:-1);this.color=PALETTE[Math.floor(Math.random()*PALETTE.length)];this.alpha=Math.random()*.06+.02;}
+  update(){this.pos+=this.speed;if(this.isH){if(this.pos>H+2)this.pos=-2;if(this.pos<-2)this.pos=H+2;}else{if(this.pos>W+2)this.pos=-2;if(this.pos<-2)this.pos=W+2;}}
+  draw(){const[r,g,b]=this.color;ctx.globalAlpha=this.alpha;ctx.strokeStyle=`rgb(${r},${g},${b})`;ctx.lineWidth=.5;ctx.beginPath();if(this.isH){ctx.moveTo(0,this.pos);ctx.lineTo(W,this.pos);}else{ctx.moveTo(this.pos,0);ctx.lineTo(this.pos,H);}ctx.stroke();}
 }
-
 class Blob {
-  constructor(i) {
-    this.i = i; this.x = Math.random()*W; this.y = Math.random()*H;
-    this.r = Math.random()*280+180;
-    this.vx = (Math.random()-0.5)*0.18; this.vy = (Math.random()-0.5)*0.14;
-    this.color = PALETTE[i % PALETTE.length]; this.phase = Math.random()*Math.PI*2;
-  }
-  update() {
-    this.x += this.vx + Math.cos(t*0.005+this.phase)*0.3;
-    this.y += this.vy + Math.sin(t*0.007+this.phase)*0.2;
-    if (this.x < -this.r) this.x=W+this.r; if (this.x > W+this.r) this.x=-this.r;
-    if (this.y < -this.r) this.y=H+this.r; if (this.y > H+this.r) this.y=-this.r;
-  }
-  draw() {
-    const [r,g,b] = this.color;
-    const grad = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
-    grad.addColorStop(0,`rgba(${r},${g},${b},0.12)`); grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
-    ctx.globalAlpha = 1; ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fill();
-  }
+  constructor(i){this.i=i;this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*280+180;this.vx=(Math.random()-.5)*.18;this.vy=(Math.random()-.5)*.14;this.color=PALETTE[i%PALETTE.length];this.phase=Math.random()*Math.PI*2;}
+  update(){this.x+=this.vx+Math.cos(t*.005+this.phase)*.3;this.y+=this.vy+Math.sin(t*.007+this.phase)*.2;if(this.x<-this.r)this.x=W+this.r;if(this.x>W+this.r)this.x=-this.r;if(this.y<-this.r)this.y=H+this.r;if(this.y>H+this.r)this.y=-this.r;}
+  draw(){const[r,g,b]=this.color;const grad=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);grad.addColorStop(0,`rgba(${r},${g},${b},.12)`);grad.addColorStop(1,`rgba(${r},${g},${b},0)`);ctx.globalAlpha=1;ctx.fillStyle=grad;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();}
 }
 
-let nodes, lines, blobs;
-function init() {
-  resize();
-  nodes = Array.from({length:80}, () => new Node());
-  lines = [...Array.from({length:8},()=>new GridLine(true)),...Array.from({length:8},()=>new GridLine(false))];
-  blobs = Array.from({length:5},(_,i)=>new Blob(i));
+let nodes,lines,blobs;
+function initBg(){resize();nodes=Array.from({length:80},()=>new Node());lines=[...Array.from({length:8},()=>new GridLine(true)),...Array.from({length:8},()=>new GridLine(false))];blobs=Array.from({length:5},(_,i)=>new Blob(i));}
+function drawBg(){ctx.clearRect(0,0,W,H);blobs.forEach(b=>{b.update();b.draw();});lines.forEach(l=>{l.update();l.draw();});ctx.globalAlpha=1;for(let i=0;i<nodes.length;i++){for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){const[r,g,b]=nodes[i].color;ctx.globalAlpha=(1-dist/120)*.12;ctx.strokeStyle=`rgb(${r},${g},${b})`;ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}}}nodes.forEach(n=>{n.update();n.draw();});ctx.globalAlpha=1;t++;requestAnimationFrame(drawBg);}
+window.addEventListener('resize',resize);
+initBg();drawBg();
+
+/* ═══════════════════════════════════════
+   FLIP: tap en foto activa el flip
+═══════════════════════════════════════ */
+const flipWrapper = document.getElementById('flipWrapper');
+const flipInner   = document.getElementById('flipInner');
+const flipFront   = document.getElementById('flipFront');
+const flipBack    = document.getElementById('flipBack');
+
+// Sync altura del flip-inner al contenido visible
+function syncHeight(toBack) {
+  if (toBack) {
+    flipInner.style.height = flipBack.scrollHeight + 'px';
+  } else {
+    flipInner.style.height = flipFront.scrollHeight + 'px';
+  }
 }
-function drawBg() {
-  ctx.clearRect(0,0,W,H);
-  blobs.forEach(b=>{b.update();b.draw();});
-  lines.forEach(l=>{l.update();l.draw();});
-  ctx.globalAlpha=1;
-  for (let i=0;i<nodes.length;i++) {
-    for (let j=i+1;j<nodes.length;j++) {
-      const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if (dist<120) {
-        const [r,g,b]=nodes[i].color;
-        ctx.globalAlpha=(1-dist/120)*0.12;
-        ctx.strokeStyle=`rgb(${r},${g},${b})`; ctx.lineWidth=0.5;
-        ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
-      }
+window.addEventListener('load', () => syncHeight(false));
+window.addEventListener('resize', () => syncHeight(flipWrapper.classList.contains('flipped')));
+setTimeout(() => syncHeight(false), 120);
+
+document.getElementById('avatarTap').addEventListener('click', () => {
+  const shell = document.getElementById('avatarTap');
+  const goingBack = !flipWrapper.classList.contains('flipped');
+
+  // Efecto de brillo antes del flip
+  shell.classList.add('tapping');
+  setTimeout(() => {
+    shell.classList.remove('tapping');
+    flipWrapper.classList.toggle('flipped');
+    if (goingBack) {
+      generateQR();
+      setTimeout(() => syncHeight(true), 100);
+    } else {
+      syncHeight(false);
     }
-  }
-  nodes.forEach(n=>{n.update();n.draw();});
-  ctx.globalAlpha=1; t++;
-  requestAnimationFrame(drawBg);
-}
-window.addEventListener('resize', resize);
-init(); drawBg();
+  }, 380);
+});
 
-/* ══════════════════════════════════════════
-   EFECTO NEÓN — recorre el borde al click
-══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   QR GENERATION
+═══════════════════════════════════════ */
+const HUB_URL = 'https://josephwhyx.github.io/';
+let qrReady = false;
+
+function generateQR() {
+  if (qrReady) return;
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  script.onload = () => {
+    // QR en el reverso del flip — fondo transparente, módulos blancos
+    const wrap = document.getElementById('qrWrap');
+    wrap.innerHTML = '';
+    new QRCode(wrap, {
+      text: HUB_URL, width: 200, height: 200,
+      colorDark: '#ffffff',
+      colorLight: 'rgba(0,0,0,0)',  // transparente
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+    // QR en la tarjeta de descarga — mismo esquema
+    const dcWrap = document.getElementById('dcQr');
+    dcWrap.innerHTML = '';
+    new QRCode(dcWrap, {
+      text: HUB_URL, width: 180, height: 180,
+      colorDark: '#ffffff',
+      colorLight: 'rgba(0,0,0,0)',
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+    qrReady = true;
+  };
+  document.head.appendChild(script);
+}
+
+/* ═══════════════════════════════════════
+   DESCARGA — tarjeta completa con html2canvas
+═══════════════════════════════════════ */
+document.getElementById('dlBtn').addEventListener('click', () => {
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  script.onload = () => {
+    const card = document.getElementById('download-card');
+    card.style.left = '-9999px';
+    html2canvas(card, {
+      backgroundColor: '#080810',
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+    }).then(c => {
+      const a = document.createElement('a');
+      a.download = 'josephwhyx-card.png';
+      a.href = c.toDataURL('image/png');
+      a.click();
+      card.style.left = '-9999px';
+    });
+  };
+  if (window.html2canvas) {
+    script.onload();
+  } else {
+    document.head.appendChild(script);
+  }
+});
+
+/* ═══════════════════════════════════════
+   NEÓN en socials
+═══════════════════════════════════════ */
 document.querySelectorAll('.soc-row').forEach(row => {
   row.addEventListener('click', function(e) {
     e.preventDefault();
@@ -715,61 +678,6 @@ document.querySelectorAll('.soc-row').forEach(row => {
       this.classList.remove('neon-active');
     }, 620);
   });
-});
-
-/* ══════════════════════════════════════════
-   FLIP CARD + QR
-══════════════════════════════════════════ */
-const HUB_URL = 'https://josephwhyx.github.io/';
-let qrGenerated = false;
-
-// Set flip-card height to match front content
-const flipCard = document.getElementById('flipCard');
-const flipFront = document.getElementById('flipFront');
-function syncFlipHeight() {
-  flipCard.style.height = flipFront.offsetHeight + 'px';
-}
-window.addEventListener('load', syncFlipHeight);
-window.addEventListener('resize', syncFlipHeight);
-setTimeout(syncFlipHeight, 100);
-
-function generateQR() {
-  if (qrGenerated) return;
-  const wrap = document.getElementById('qrWrap');
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  script.onload = () => {
-    wrap.innerHTML = '';
-    new QRCode(wrap, {
-      text: HUB_URL,
-      width: 180, height: 180,
-      colorDark: '#080810',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H,
-    });
-    setTimeout(() => {
-      const qrCanvas = wrap.querySelector('canvas');
-      if (qrCanvas) document.getElementById('qrDownload').href = qrCanvas.toDataURL('image/png');
-      // Sync height now that QR is rendered
-      syncFlipHeight();
-    }, 200);
-    qrGenerated = true;
-  };
-  document.head.appendChild(script);
-}
-
-document.getElementById('flipScene').addEventListener('click', function() {
-  this.classList.toggle('flipped');
-  if (this.classList.contains('flipped')) {
-    generateQR();
-    // After flip, sync to back height (QR block)
-    setTimeout(() => {
-      const back = this.querySelector('.flip-back');
-      if (back) flipCard.style.height = back.scrollHeight + 'px';
-    }, 350);
-  } else {
-    syncFlipHeight();
-  }
 });
 </script>
 </body>
