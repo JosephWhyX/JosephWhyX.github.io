@@ -5,14 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Joseph Yael · @JosephWhyX</title>
 
-<!-- Open Graph -->
 <meta property="og:title" content="Joseph Yael · @JosephWhyX">
 <meta property="og:description" content="Vibe Coder, founder y mecatrónico. Conecta conmigo — todo en un lugar.">
 <meta property="og:image" content="https://josephwhyx.github.io/foto.png">
 <meta property="og:url" content="https://josephwhyx.github.io/">
 <meta property="og:type" content="website">
 
-<!-- Twitter/X Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Joseph Yael · @JosephWhyX">
 <meta name="twitter:description" content="Vibe Coder, founder y mecatrónico. Conecta conmigo — todo en un lugar.">
@@ -277,9 +275,42 @@ body {
 .proj-name { font-size: 14px; font-weight: 500; color: rgba(238,234,244,0.9); }
 .proj-desc { font-size: 12px; font-weight: 300; color: rgba(238,234,244,0.3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .proj-badge { font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 99px; flex-shrink: 0; }
+
 .b-live    { background: rgba(0,229,255,0.08); color: rgba(0,229,255,0.75); border: 1px solid rgba(0,229,255,0.2); }
 .b-dev     { background: rgba(179,136,255,0.08); color: rgba(179,136,255,0.75); border: 1px solid rgba(179,136,255,0.2); }
 .b-concept { background: rgba(255,180,60,0.08); color: rgba(255,200,80,0.75); border: 1px solid rgba(255,180,60,0.2); }
+
+/* Badge animado para Registro Abierto */
+.b-open { 
+  background: rgba(255,110,199,0.12); 
+  color: #ff6ec7; 
+  border: 1px solid rgba(255,110,199,0.4); 
+  animation: pulseOpen 2s infinite alternate; 
+}
+@keyframes pulseOpen { 
+  from { box-shadow: 0 0 2px rgba(255,110,199,0.1); } 
+  to { box-shadow: 0 0 10px rgba(255,110,199,0.6); } 
+}
+
+/* Fila resaltada para DropX */
+.proj-row.highlight-dx { 
+  border: 1px solid rgba(255,110,199,0.25); 
+  background: rgba(255,110,199,0.04); 
+  position: relative; 
+  overflow: hidden; 
+}
+.proj-row.highlight-dx::before { 
+  content: ''; 
+  position: absolute; 
+  left: 0; top: 0; bottom: 0; 
+  width: 2px; 
+  background: #ff6ec7; 
+  box-shadow: 0 0 12px #ff6ec7; 
+}
+.proj-row.highlight-dx:hover { 
+  background: rgba(255,110,199,0.1); 
+}
+
 .proj-arr  { font-size: 14px; color: rgba(238,234,244,0.2); opacity: 0; transform: translateX(-5px); transition: all 0.18s; }
 .d-dx { background: rgba(255,110,199,0.08); color: rgba(255,110,199,0.7); border: 1px solid rgba(255,110,199,0.15); }
 .d-cx { background: rgba(0,229,255,0.08); color: rgba(0,229,255,0.7); border: 1px solid rgba(0,229,255,0.15); }
@@ -349,7 +380,6 @@ svg { display: block; }
 <canvas id="bg"></canvas>
 <div class="vignette"></div>
 
-<!-- Tarjeta oculta para descarga -->
 <div id="download-card">
   <div class="dc-avatar"><img src="foto.png" crossorigin="anonymous"></div>
   <div class="dc-name">Joseph Yael</div>
@@ -361,7 +391,6 @@ svg { display: block; }
 
 <div class="wrap">
 
-  <!-- ── Hero fijo ── -->
   <div class="hero">
     <div class="avatar-shell" id="avatarTap">
       <div class="avatar-halo"></div>
@@ -374,11 +403,9 @@ svg { display: block; }
     <div class="student-line">Estudiante de Ing. Mecatrónica · Tec de Monterrey</div>
   </div>
 
-  <!-- ── Flip: bio + tags + divider + socials ── -->
   <div class="flip-wrapper" id="flipWrapper">
     <div class="flip-inner" id="flipInner">
 
-      <!-- FRENTE -->
       <div class="flip-front" id="flipFront">
         <p class="bio">
           Vibe Coder, Asesor de Bienes Raíces &amp; Founder de <em>WhyXLabs</em>,
@@ -453,23 +480,7 @@ svg { display: block; }
             <div class="soc-arr">→</div>
           </a>
 
-          <a class="soc-row" href="https://chat.whatsapp.com/EWgjNsms6LaL5L8XOEaV8T" target="_blank">
-            <div class="soc-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div class="soc-text"><div class="soc-name">Grupo WhatsApp</div><div class="soc-sub">Únete a la comunidad</div></div>
-            <div class="soc-arr">→</div>
-          </a>
-
-        </div><!-- /socials -->
-      </div><!-- /flip-front -->
-
-      <!-- REVERSO -->
-      <div class="flip-back" id="flipBack">
+        </div></div><div class="flip-back" id="flipBack">
         <div class="qr-code-wrap" id="qrWrap"></div>
         <div class="qr-url">josephwhyx.github.io</div>
         <button class="qr-dl-btn" id="dlBtn">
@@ -478,11 +489,7 @@ svg { display: block; }
         </button>
       </div>
 
-    </div><!-- /flip-inner -->
-  </div><!-- /flip-wrapper -->
-
-  <!-- Resto de página -->
-  <div class="divider" style="margin-top:32px;"></div>
+    </div></div><div class="divider" style="margin-top:32px;"></div>
 
   <div style="font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(238,234,244,0.2);padding:20px 0 14px;">Proyecto destacado</div>
   <a class="kor-card" href="https://www.youtube.com/watch?v=hKQBdCSSs_Q&t=4s" target="_blank">
@@ -494,13 +501,18 @@ svg { display: block; }
   </a>
 
   <div style="font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(238,234,244,0.2);padding:24px 0 14px;">Más proyectos</div>
+  
   <div class="projects">
-    <a class="proj-row" href="https://www.facebook.com/profile.php?id=61589202691433" target="_blank">
+    <a class="proj-row highlight-dx" href="https://whyxlabs.vercel.app/dropx.html" target="_blank">
       <div class="proj-dot d-dx">DX</div>
-      <div class="proj-info"><div class="proj-name">DropX</div><div class="proj-desc">Catálogos inmobiliarios y fichas técnicas · Flutter</div></div>
-      <span class="proj-badge b-dev">En dev</span>
+      <div class="proj-info">
+        <div class="proj-name">DropX V2</div>
+        <div class="proj-desc">Catálogos inmobiliarios · ¡Buscando usuarios!</div>
+      </div>
+      <span class="proj-badge b-open">Registro abierto</span>
       <div class="proj-arr">→</div>
     </a>
+
     <div class="proj-row" style="cursor:default;">
       <div class="proj-dot d-cx">CX</div>
       <div class="proj-info"><div class="proj-name">ContaX</div><div class="proj-desc">Gestión fiscal para contadores · Concepto</div></div>
@@ -528,9 +540,7 @@ svg { display: block; }
     <div>© 2026 · Todos los derechos reservados</div>
   </div>
 
-</div><!-- /wrap -->
-
-<script>
+</div><script>
 /* ═══════════════════════════════════════
    BACKGROUND CANVAS
 ═══════════════════════════════════════ */
